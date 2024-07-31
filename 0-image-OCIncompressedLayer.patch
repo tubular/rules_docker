@@ -1,0 +1,16 @@
+diff --git a/container/go/pkg/compat/image.go b/container/go/pkg/compat/image.go
+index f04512d..c806818 100644
+--- a/container/go/pkg/compat/image.go
++++ b/container/go/pkg/compat/image.go
+@@ -172,6 +172,11 @@ func (li *legacyImage) genManifest() error {
+ 			size = fl.size
+ 			urls = fl.urls
+ 		}
++		if mediaType == types.OCIUncompressedLayer {
++			// The remote pusher always stores blobs in compressed format, even if the
++			// original media type was uncompressed.
++			mediaType = types.OCILayer
++		}
+ 		li.manifest.Layers = append(li.manifest.Layers, v1.Descriptor{
+ 			MediaType: mediaType,
+ 			Digest:    digest,
