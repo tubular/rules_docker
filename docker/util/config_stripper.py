@@ -68,6 +68,13 @@ def strip_tar(input, output):
         # that symlinks to a lower layer that hasn't been extracted yet. Just
         # reversing the iteration order avoids this problem.
         for layer in reversed(image['Layers']):
+          # Docker 25+ saves in OCI format and omits empty layer blobs
+          # (e.g. sha256 5f70bf18...) from the archive while the compat
+          # manifest.json still references them. Skip missing layers so
+          # that Layers and rootfs.diff_ids stay consistent.
+          if not os.path.exists(os.path.join(tempdir, layer)):
+              continue
+
           (new_layer_name, new_diff_id) = strip_layer(tempdir, layer)
 
           new_layers.append(new_layer_name)
